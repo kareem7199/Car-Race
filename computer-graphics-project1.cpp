@@ -1,12 +1,50 @@
 #include <iostream>
 #include <glut.h>
+#include <cstdlib> 
+
 using namespace std;
+
+struct rgb {
+    float red;
+    float green;
+    float blue;
+};
+
+struct Car {
+    float translateX;
+    float translateY;
+    rgb color;
+};
+
+rgb createColor(float r , float g , float b) {
+    rgb newColor;
+    newColor.red = r / 255;
+    newColor.green = g / 255;
+    newColor.blue = b / 255;
+    return newColor;
+}
+
+Car createCar(float x , float y , rgb carColor) {
+    Car newCar;
+    newCar.translateX = x;
+    newCar.translateY = y;
+    newCar.color = carColor;
+    return newCar;
+}
+
+rgb navyBlue = createColor(0.0f , 45.0f , 114.0f);
+rgb limeGreen = createColor(0.0f , 177.0f , 64.0f);
+rgb fireRed = createColor(200.0f, 16.0f, 46.0f);
+rgb pink = createColor(189.0f, 0.0f, 126.0f);
+rgb colors[] = {navyBlue , limeGreen , fireRed , pink};
+
 float line1Y = 600;
 float line2Y = 400;
 float line3Y = 200;
 float line4Y = 0;
 float tree1TranslateY = 0;
 float tree2TranslateY = 0;
+Car playerCar = createCar(0.0f , 0.0f , navyBlue);
 
 void trunk1() {
     glBegin(GL_POLYGON);
@@ -115,6 +153,115 @@ void background() {
     tree2();
 }
 
+void car(Car newCar) {
+
+    glPushMatrix();
+    glTranslated(newCar.translateX, newCar.translateY , 0);
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(0.0f, 100.0f);
+    glVertex2d(10.0f, 130.0f);
+    glVertex2d(20.0f, 150.0f);
+    glVertex2d(80.0f, 150.0f);
+    glVertex2d(90.0f, 130.0f);
+    glVertex2d(100.0f, 100.0f);
+    glVertex2d(100.0f, 20.0f);
+    glVertex2d(90.0f, 0.0f);
+    glVertex2d(10.0f, 0.0f);
+    glVertex2d(0.0f, 20.0f);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3f(newCar.color.red, newCar.color.green, newCar.color.blue);
+    glVertex2d(2.0f, 100.0f);
+    glVertex2d(12.0f, 130.0f);
+    glVertex2d(22.0f, 148.0f);
+    glVertex2d(78.0f, 148.0f);
+    glVertex2d(88.0f, 130.0f);
+    glVertex2d(98.0f, 100.0f);
+    glVertex2d(98.0f, 20.0f);
+    glVertex2d(88.0f, 2.0f);
+    glVertex2d(12.0f, 2.0f);
+    glVertex2d(2.0f, 20.0f);
+    glEnd();
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(10.0f, 100.0f);
+    glVertex2d(20.0f, 130.0f);
+    glVertex2d(30.0f, 150.0f);
+    glVertex2d(70.0f, 150.0f);
+    glVertex2d(80.0f, 130.0f);
+    glVertex2d(90.0f, 100.0f);
+    glVertex2d(90.0f, 20.0f);
+    glVertex2d(80.0f, 6.0f);
+    glVertex2d(20.0f, 6.0f);
+    glVertex2d(10.0f, 20.0f);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glColor3f(newCar.color.red, newCar.color.green, newCar.color.blue);
+    glVertex2d(12.0f, 100.0f);
+    glVertex2d(22.0f, 130.0f);
+    glVertex2d(32.0f, 148.0f);
+    glVertex2d(68.0f, 148.0f);
+    glVertex2d(78.0f, 130.0f);
+    glVertex2d(88.0f, 100.0f);
+    glVertex2d(88.0f, 20.0f);
+    glVertex2d(78.0f, 8.0f);
+    glVertex2d(22.0f, 8.0f);
+    glVertex2d(12.0f, 20.0f);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(15.0f, 100.0f);
+    glVertex2d(85.0f, 100.0f);
+    glVertex2d(75.0f, 75.0f);
+    glVertex2d(25.0f, 75.0f);
+    glEnd();
+   
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(12.0f, 95.0f);
+    glVertex2d(25.0f, 65.0f);
+    glVertex2d(25.0f, 55.0f);
+    glVertex2d(12.0f, 55.0f);
+    glEnd();
+
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(88.0f, 95.0f);
+    glVertex2d(75.0f, 65.0f);
+    glVertex2d(75.0f, 55.0f);
+    glVertex2d(88.0f, 55.0f);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(15.0f, 20.0f);
+    glVertex2d(85.0f, 20.0f);
+    glVertex2d(75.0f, 35.0f);
+    glVertex2d(25.0f, 35.0f);
+    glEnd();
+    
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(12.0f, 25.0f);
+    glVertex2d(25.0f, 40.0f);
+    glVertex2d(25.0f, 50.0f);
+    glVertex2d(12.0f, 50.0f);
+    glEnd();
+
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(88.0f, 25.0f);
+    glVertex2d(75.0f, 40.0f);
+    glVertex2d(75.0f, 50.0f);
+    glVertex2d(88.0f, 50.0f);
+    glEnd();
+    
+    glPopMatrix();
+}
+
 void timer1(int valu) {
     line1Y -= 10;
     line2Y -= 10;
@@ -149,6 +296,7 @@ void Display()
     // Clear the screen buffer
     glClear(GL_COLOR_BUFFER_BIT);
     background();
+    car(playerCar);
     // Sends all output to display
     glFlush();
 }
