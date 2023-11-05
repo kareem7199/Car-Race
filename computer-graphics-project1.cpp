@@ -1,6 +1,7 @@
 #include <iostream>
 #include <glut.h>
 #include <cstdlib> 
+#include<cmath>
 
 using namespace std;
 
@@ -37,14 +38,90 @@ rgb limeGreen = createColor(0.0f , 177.0f , 64.0f);
 rgb fireRed = createColor(200.0f, 16.0f, 46.0f);
 rgb pink = createColor(189.0f, 0.0f, 126.0f);
 rgb colors[] = {navyBlue , limeGreen , fireRed , pink};
-
+float positions[] = {222.5 , 477.5};
+float winLineY = 600;
 float line1Y = 600;
 float line2Y = 400;
 float line3Y = 200;
 float line4Y = 0;
 float tree1TranslateY = 0;
 float tree2TranslateY = 0;
-Car playerCar = createCar(0.0f , 0.0f , navyBlue);
+bool crashed = false;
+bool win = false;
+Car playerCar = createCar(222.5 , 10.0f , navyBlue);
+Car obstacleCar = createCar(477.5, 750.0f, fireRed);
+int cnt = 0;
+int gameTime = 200;
+float gap = 25;
+
+void black(float x , float y) {
+    glBegin(GL_POLYGON);
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glVertex2d(x, y);
+    glVertex2d(x + gap, y);
+    glVertex2d(x + gap, y - gap);
+    glVertex2d(x , y - gap);
+    glEnd();
+}
+
+void white(float x, float y) {
+    glBegin(GL_POLYGON);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    glVertex2d(x, y);
+    glVertex2d(x + gap, y);
+    glVertex2d(x + gap, y - gap);
+    glVertex2d(x, y - gap);
+    glEnd();
+}
+
+void displayWinLine() {
+    glPushMatrix();
+    glTranslated(150.0f, winLineY + gap , 0);
+    bool isBlack = true;
+    for (float i = 0; i < 500; i+= gap) {
+        if (isBlack) black(i, gap);
+        else white(i, gap);
+        isBlack = !isBlack;
+    }
+    isBlack = false;
+    for (float i = 0; i < 500; i += gap) {
+        if (isBlack) black(i, gap * 2);
+        else white(i, gap * 2);
+        isBlack = !isBlack;
+    }
+    glPopMatrix();
+}
+
+void loseMessage() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 1.0, 1.0); // Set text color to white
+
+    // Set the position for the text
+    glRasterPos2f(250, 300);
+
+    // Display the text
+    std::string text = "Game Over XD! press r to play again";
+    for (char c : text) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glutSwapBuffers();
+}
+void winMessage() {
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0, 1.0, 1.0); // Set text color to white
+
+    // Set the position for the text
+    glRasterPos2f(170, 300);
+
+    // Display the text
+    std::string text = "Winner Winner Chicken Dinner ! press r to play again ";
+    for (char c : text) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, c);
+    }
+
+    glutSwapBuffers();
+}
 
 void trunk1() {
     glBegin(GL_POLYGON);
@@ -258,36 +335,144 @@ void car(Car newCar) {
     glVertex2d(75.0f, 50.0f);
     glVertex2d(88.0f, 50.0f);
     glEnd();
-    
+
+    glPopMatrix();
+}
+
+void showObstacleCar() {
+    if (obstacleCar.translateY <= -150.0) {
+        obstacleCar.translateY = 750;
+        obstacleCar.translateX = positions[rand() % 2];
+        obstacleCar.color = colors[rand() % 4];
+    }
+    glPushMatrix();
+    glTranslated(50 + obstacleCar.translateX, 75.5 + obstacleCar.translateY, 0);
+    glRotated(180, 0, 0, 1);
+    glTranslated(-(50 + obstacleCar.translateX), -(75 + obstacleCar.translateY), 0);
+    car(obstacleCar);
     glPopMatrix();
 }
 
 void timer1(int valu) {
-    line1Y -= 10;
-    line2Y -= 10;
-    line3Y -= 10;
-    line4Y -= 10;
-    tree1TranslateY -= 10;
-    tree2TranslateY -= 10;
-    if (line1Y <= 0) line1Y = 800;
-    if (line2Y <= 0) line2Y = 800;
-    if (line3Y <= 0) line3Y = 800;
-    if (line4Y <= 0) line4Y = 800;
-    if (tree1TranslateY <= -350) tree1TranslateY = 550;
-    if (tree2TranslateY <= -450) tree2TranslateY = 350;
-    glutPostRedisplay();
 
-    glutTimerFunc(50, timer1, 0);		//1000 milliseconds
+    if (!crashed && !win) {
+        cnt += 1;
+        if (cnt >= gameTime) {
+            winLineY -= 10;
+        }
+        line1Y -= 10;
+        line2Y -= 10;
+        line3Y -= 10;
+        line4Y -= 10;
+        tree1TranslateY -= 10;
+        tree2TranslateY -= 10;
+        obstacleCar.translateY -= 10;
+        if (line1Y <= 0) line1Y = 800;
+        if (line2Y <= 0) line2Y = 800;
+        if (line3Y <= 0) line3Y = 800;
+        if (line4Y <= 0) line4Y = 800;
+        if (tree1TranslateY <= -350) tree1TranslateY = 550;
+        if (tree2TranslateY <= -450) tree2TranslateY = 350;
+        glutPostRedisplay();
+
+        glutTimerFunc(50, timer1, 0);		//1000 milliseconds
+    }
+}
+
+void playAgain() {
+    playerCar = createCar(222.5, 10.0f, navyBlue);
+    obstacleCar = createCar(477.5, 750.0f, fireRed);
+     line1Y = 600;
+     winLineY = 600;
+     cnt = 0;
+     line2Y = 400;
+     line3Y = 200;
+     line4Y = 0;
+     win = false;
+     tree1TranslateY = 0;
+     tree2TranslateY = 0;
+     crashed = false;
+     glutTimerFunc(0, timer1, 0);
+     
+     cout << crashed;
+}
+
+void my_keyboard(unsigned char key, int x, int y) {
+    if (crashed || win) {
+        switch (key) {
+        case 'r':
+            playAgain();
+            break;
+
+        default:
+            break;
+        }
+        glutPostRedisplay();
+    }
 }
 
 void specFunc(int key, int x, int y) {
-    glutPostRedisplay();
+    if (!crashed && !win) {
+        switch (key)
+        {
+        case GLUT_KEY_RIGHT:
+            playerCar.translateX += 10;
+            break;
+        case GLUT_KEY_LEFT:
+            playerCar.translateX -= 10;
+            break;
+        case GLUT_KEY_DOWN:
+            obstacleCar.translateY -= 10;
+            break;
+        default:
+            break;
+        }
+        if (playerCar.translateX < 150)
+            playerCar.translateX = 150;
+        if (playerCar.translateX > 550)
+            playerCar.translateX = 550;
+        glutPostRedisplay();
+    }
 }
 
-void my_mouse_function(int button, int state, int x, int y) {
+void checkCrash() {
+    float playerCarRightXPoint = playerCar.translateX + 50;
+    float playerCarLeftXPoint = playerCar.translateX - 50;
+    float obstacleCarRightXPoint = obstacleCar.translateX + 50;
+    float obstacleCarLeftXPoint = obstacleCar.translateX - 50;
 
-    glutPostRedisplay();
+    float playerCarTopYPoint = playerCar.translateY + 150;
+    float playerCarBottomYPoint = playerCar.translateY;
+    float obstacleCarTopYPoint = obstacleCar.translateY + 150;
+    float obstacleCarBottomYPoint = obstacleCar.translateY;
+
+    if (playerCarRightXPoint >= obstacleCarLeftXPoint &&
+        playerCarRightXPoint <= obstacleCarRightXPoint &&
+        (
+            playerCarBottomYPoint <= obstacleCarTopYPoint && playerCarBottomYPoint >= obstacleCarBottomYPoint ||
+            playerCarTopYPoint <= obstacleCarTopYPoint && playerCarTopYPoint >= obstacleCarBottomYPoint
+            )
+        )
+    {
+        crashed = true;
+    }
+
+    if (playerCarLeftXPoint >= obstacleCarLeftXPoint &&
+        playerCarLeftXPoint <= obstacleCarRightXPoint &&
+        (
+            playerCarBottomYPoint <= obstacleCarTopYPoint && playerCarBottomYPoint >= obstacleCarBottomYPoint ||
+            playerCarTopYPoint <= obstacleCarTopYPoint && playerCarTopYPoint >= obstacleCarBottomYPoint
+            )
+        ){
+        crashed = true;
+        }
 }
+
+void checkWin() {
+    if (winLineY <= -75)
+        win = true;
+}
+
 
 
 
@@ -295,8 +480,19 @@ void Display()
 {
     // Clear the screen buffer
     glClear(GL_COLOR_BUFFER_BIT);
+   
     background();
+    checkCrash();
+    checkWin();
+    if (!crashed && cnt >= gameTime)
+        displayWinLine();
     car(playerCar);
+    showObstacleCar();
+    if (crashed && !win)
+        loseMessage();
+    if (!crashed && win)
+        winMessage();
+  
     // Sends all output to display
     glFlush();
 }
@@ -310,7 +506,8 @@ int main(int argc, char** argr) {
     glutDisplayFunc(Display);
     glutTimerFunc(0, timer1, 0);
     glutSpecialFunc(specFunc);
-    glutMouseFunc(my_mouse_function);
+    glutKeyboardFunc(my_keyboard);
+    //glutMouseFunc(my_mouse_function);
     glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
     glClearColor(0.2f, 0.2f, 0.2f, 0.9f);
     gluOrtho2D(0.0, 800, 0.0, 600);
