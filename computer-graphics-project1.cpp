@@ -469,7 +469,7 @@ void checkCrash() {
 }
 
 void checkWin() {
-    if (winLineY <= -75)
+    if (winLineY <= -65)
         win = true;
 }
 
